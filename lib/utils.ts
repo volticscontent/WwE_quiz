@@ -1,66 +1,93 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import axios from "axios"
+import { useEffect } from "react"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Configurações dos pixels usando variáveis de ambiente
-export const PIXEL_ID = process.env.FACEBOOK_PIXEL_ID || "701445339386879"
-export const TIKTOK_ACCESS_TOKEN = process.env.TIKTOK_ACCESS_TOKEN || "c2e51e03eefa47186ba1a9b52ee1bba4cb037872"
-export const TIKTOK_PIXEL_ID_1 = process.env.TIKTOK_PIXEL_ID_1 || "D1QOBFJC77U41SK2P3PG"
-export const TIKTOK_PIXEL_ID_2 = process.env.TIKTOK_PIXEL_ID_2 || "D1RMNC3C77U41FGAQFSG"
+// Configurações dos pixels usando variáveis de ambiente NEXT_PUBLIC_ (seguras para frontend)
+export const FACEBOOK_PIXEL_ID_1 = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID_1
+export const FACEBOOK_PIXEL_ID_2 = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID_2
+export const TIKTOK_PIXEL_ID_1 = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID_1
+export const TIKTOK_PIXEL_ID_2 = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID_2
+export const UTMIFY_PIXEL_ID = process.env.NEXT_PUBLIC_UTMIFY_PIXEL_ID
+
+// Webhook do n8n para captura do ttclid
+const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || "https://n8n.landcriativa.com/webhook/quiz"
+const N8N_WEBHOOK_KEY = process.env.NEXT_PUBLIC_N8N_WEBHOOK_KEY || "XBEHgtft1SvVT75xtvvogD95ExDXCqekgF2emRXDPR4KBx7QLKBfxps3tWfpBHAV"
 
 // Controle global de eventos já disparados
 const trackedEvents = new Set<string>()
 
-// Função para enviar eventos via API do TikTok
-async function sendTikTokApiEvent(eventName: string, parameters?: Record<string, any>, pixelId?: string) {
+// Função para capturar ttclid e enviar para n8n
+export async function captureTikTokClickId() {
+  if (typeof window === 'undefined') return
+
   try {
-    const payload = {
-      pixel_code: pixelId || TIKTOK_PIXEL_ID_1,
-      event: eventName,
-      event_id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: Math.floor(Date.now() / 1000).toString(),
-      context: {
-        page: {
-          url: typeof window !== 'undefined' ? window.location.href : '',
-          referrer: typeof window !== 'undefined' ? document.referrer : ''
-        },
-        user: {
-          external_id: '', // Pode ser preenchido com ID do usuário se disponível
-          phone_number: '', // Pode ser preenchido se disponível
-          email: '' // Pode ser preenchido se disponível
-        },
-        ad: {
-          callback: ''
-        }
-      },
-      properties: parameters || {}
+    const urlParams = new URLSearchParams(window.location.search)
+    let ttclid = urlParams.get('ttclid')
+
+    // Se não há ttclid na URL, tentar pegar do localStorage
+    if (!ttclid) {
+      ttclid = localStorage.getItem('captured_ttclid')
+    } else {
+      // Se há ttclid na URL, salvar no localStorage
+      localStorage.setItem('captured_ttclid', ttclid)
     }
 
-    const response = await fetch('https://business-api.tiktok.com/open_api/v1.3/event/track/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Token': TIKTOK_ACCESS_TOKEN
-      },
-      body: JSON.stringify({
-        events: [payload]
-      })
-    })
+    if (ttclid) {
+      // Capturar email parcial se disponível
+      const email = localStorage.getItem('lead_email') || ''
+      
+      // Dados para enviar ao webhook
+      const payload = {
+        ttclid,
+        email,
+        timestamp: Date.now(),
+        url: window.location.href,
+        referrer: document.referrer || '',
+        user_agent: navigator.userAgent
+      }
 
-    if (response.ok) {
-      const result = await response.json()
-      console.log(`[TikTok API ${pixelId}] Event sent successfully:`, eventName, result)
-      return result
-    } else {
-      const error = await response.text()
-      console.error(`[TikTok API ${pixelId}] Error sending event:`, error)
+      const response = await axios.post(N8N_WEBHOOK_URL, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': N8N_WEBHOOK_KEY
+        },
+        timeout: 10000 // 10 segundos de timeout
+      })
+
+      if (response.status >= 200 && response.status < 300) {
+        return response.data
+      } else {
+        console.error('[TikTok Click ID] Error sending to n8n with axios:', response.status, response.data)
+      }
     }
   } catch (error) {
-    console.error(`[TikTok API ${pixelId}] Network error:`, error)
+    console.error('[TikTok Click ID] Error caught:', error)
+    if (axios.isAxiosError(error)) {
+      console.error('[TikTok Click ID] Axios error status:', error.response?.status)
+      console.error('[TikTok Click ID] Axios error data:', error.response?.data)
+      console.error('[TikTok Click ID] Axios error message:', error.message)
+      console.error('[TikTok Click ID] Axios error config:', error.config)
+    } else {
+      console.error('[TikTok Click ID] Network error:', error)
+    }
   }
+}
+
+// Hook para executar captura do ttclid automaticamente
+export function useTikTokClickIdCapture() {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Executar captura do ttclid
+      captureTikTokClickId()
+    }
+  }, []) // Array vazio para executar apenas uma vez
+  
+  return {} // Retornar objeto vazio para evitar problemas de TypeScript
 }
 
 export function trackEvent(eventName: string, parameters?: Record<string, any>, allowDuplicates: boolean = true) {
@@ -71,18 +98,18 @@ export function trackEvent(eventName: string, parameters?: Record<string, any>, 
   }
 
   if (typeof window !== 'undefined') {
-    // Facebook Pixel
+    // Facebook Pixels usando track simples
     if ((window as any).fbq) {
       try {
         (window as any).fbq('track', eventName, parameters)
-        console.log(`[Meta Pixel ${PIXEL_ID}] Tracked event:`, eventName, parameters)
+        console.log(`[Meta Pixels] Tracked event:`, eventName, parameters)
       } catch (error) {
         console.error('[Meta Pixel] Error tracking event:', error)
       }
     }
 
     // TikTok Pixel 1
-    if ((window as any).ttq) {
+    if ((window as any).ttq && TIKTOK_PIXEL_ID_1) {
       try {
         (window as any).ttq.track(eventName, parameters)
         console.log(`[TikTok Pixel ${TIKTOK_PIXEL_ID_1}] Tracked event:`, eventName, parameters)
@@ -99,15 +126,6 @@ export function trackEvent(eventName: string, parameters?: Record<string, any>, 
       } catch (error) {
         console.error('[UTMify Pixel] Error tracking event:', error)
       }
-    }
-
-    // Envio via API do TikTok para ambos os pixels
-    if (TIKTOK_ACCESS_TOKEN && TIKTOK_ACCESS_TOKEN !== 'your_tiktok_token_here') {
-      // Enviar para o primeiro pixel
-      sendTikTokApiEvent(eventName, parameters, TIKTOK_PIXEL_ID_1)
-      
-      // Enviar para o segundo pixel também
-      sendTikTokApiEvent(eventName, parameters, TIKTOK_PIXEL_ID_2)
     }
 
     // Marca o evento como disparado
@@ -133,8 +151,7 @@ export function trackQuizStep(step: string, questionNumber?: number, isCorrect?:
   
   // Log detalhado para debug
   console.log(`[Quiz Step Tracking] ${stepKey}:`, parameters)
-  console.log(`[Pixels] Meta: ${PIXEL_ID}, TikTok 1: ${TIKTOK_PIXEL_ID_1}, TikTok 2: ${TIKTOK_PIXEL_ID_2}`)
-  console.log(`[TikTok API] Token: ${TIKTOK_ACCESS_TOKEN ? 'Configured' : 'Not configured'}`)
+  console.log(`[Pixels] Meta 1: ${FACEBOOK_PIXEL_ID_1 || 'Not configured'}, Meta 2: ${FACEBOOK_PIXEL_ID_2 || 'Not configured'}, TikTok 1: ${TIKTOK_PIXEL_ID_1 || 'Not configured'}, TikTok 2: ${TIKTOK_PIXEL_ID_2 || 'Not configured'}`)
   
   trackEvent(stepKey, parameters, false) // Não permite duplicatas por padrão
 }

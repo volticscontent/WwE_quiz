@@ -13,7 +13,7 @@ import Script from "next/script"
 import Head from "next/head"
 import styles from '@/styles/animations.module.css'
 import PartnersFooter from "@/components/partners-footer"
-import { trackEvent as trackPixelEvent, trackQuizStep } from "@/lib/utils"
+import { trackEvent as trackPixelEvent, trackQuizStep, useTikTokClickIdCapture } from "@/lib/utils"
 
 // Adicionar animação keyframes para a barra de progresso
 const progressBarStyles = `
@@ -425,40 +425,11 @@ const VideoPlayer = React.memo(({ isReady }: { isReady: boolean }) => {
 
 VideoPlayer.displayName = 'VideoPlayer';
 
-// Componente de Layout para os scripts simplificado - apenas TikTok (Facebook já está no layout global)
-const PixelScripts = () => (
-  <>
-    {/* TikTok Pixel */}
-    <Script
-      id="tiktok-pixel"
-      strategy="beforeInteractive"
-      dangerouslySetInnerHTML={{
-        __html: `
-          !function (w, d, t) {
-            w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
-
-            ttq.load('D1QOBFJC77U41SK2P3PG');
-            ttq.page();
-          }(window, document, 'ttq');
-        `
-      }}
-    />
-    <Script
-      id="tiktok-pixel"
-      strategy="beforeInteractive"
-      dangerouslySetInnerHTML={{
-        __html: `
-          !function (w, d, t) {
-            w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
-
-            ttq.load('D1RMNC3C77U41FGAQFSG');
-            ttq.page();
-          }(window, document, 'ttq');
-        `
-      }}
-    />
-  </>
-);
+// Componente de Layout para os scripts simplificado - removido pois já está no layout global
+// const PixelScripts = () => (
+//   <>
+//   </>
+// );
 
 // Hook para controlar o carregamento dos pixels - simplificado
 const usePixelLoader = () => {
@@ -843,15 +814,21 @@ const CompleteHeader = ({ onUSPClick }: { onUSPClick: () => void }) => {
 
 // Remover o MinimalHeader e USPHeader antigos e usar apenas o CompleteHeader
 export default function PSGQuiz() {
-  const [gameStarted, setGameStarted] = useState(false)
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [selectedAnswer, setSelectedAnswer] = useState("")
-  const [correctAnswers, setCorrectAnswers] = useState(0)
-  const [quizCompleted, setQuizCompleted] = useState(false)
-  const [showNotification, setShowNotification] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showUSPPanel, setShowUSPPanel] = useState(false)
+  const [gameStarted, setGameStarted] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState("");
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showUSPPanel, setShowUSPPanel] = useState(false);
+
+  // Usar o hook de captura do ttclid
+  console.log('[PSGQuiz] Chamando useTikTokClickIdCapture...')
+  useTikTokClickIdCapture();
+  console.log('[PSGQuiz] useTikTokClickIdCapture chamado')
+
   const isPixelsReady = usePixelLoader()
   const { playSound, isInitialized: audioInitialized } = useAudioSystem();
   const [progressValue, setProgressValue] = useState(100);
@@ -1015,7 +992,6 @@ export default function PSGQuiz() {
   if (!gameStarted) {
     return (
       <>
-        <PixelScripts />
         <div className="min-h-screen bg-white flex flex-col">
           <CompleteHeader onUSPClick={handleUSPClick} />
           <USPPanel isOpen={showUSPPanel} onClose={handleUSPClose} />
@@ -1070,7 +1046,6 @@ export default function PSGQuiz() {
   if (quizCompleted) {
     return (
       <>
-        <PixelScripts />
         <div className="min-h-screen bg-white flex flex-col">
           <CompleteHeader onUSPClick={handleUSPClick} />
           <USPPanel isOpen={showUSPPanel} onClose={handleUSPClose} />
@@ -1108,7 +1083,6 @@ export default function PSGQuiz() {
 
   return (
     <>
-      <PixelScripts />
       <div className="min-h-screen bg-white flex flex-col">
         <CompleteHeader onUSPClick={handleUSPClick} />
         <USPPanel isOpen={showUSPPanel} onClose={handleUSPClose} />
