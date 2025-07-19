@@ -910,7 +910,7 @@ export default function PSGQuiz() {
   const handleBuyNowClick = (e: React.MouseEvent) => {
     e.preventDefault();
     trackQuizStep('go_to_store'); // Evento final - ir para a loja
-    const newWindow = window.open("https://www.chelseafcstore.shop/", "_blank");
+    const newWindow = window.open("https://www.chelseafcstore.store/", "_blank");
     if (newWindow) newWindow.opener = null;
   }
 
