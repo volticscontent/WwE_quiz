@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'Created with v0',
   generator: 'v0.dev',
   icons: {
-    icon: '/logo.webp',          
+    icon: '/tdf/france.png',          
   },
 }
 
@@ -31,9 +31,7 @@ export default function RootLayout({
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
               
-              fbq('init', '701445339386879');
-              fbq('init', '2182931308840190');
-              fbq('track', 'PageView');
+              fbq('init', '1297494711949971');
             `,
           }}
         />
@@ -42,7 +40,7 @@ export default function RootLayout({
             height="1"
             width="1"
             style={{ display: 'none' }}
-            src="https://www.facebook.com/tr?id=701445339386879&ev=PageView&noscript=1"
+            src="https://www.facebook.com/tr?id=1297494711949971&ev=PageView&noscript=1"
           />
         </noscript>
         
@@ -76,8 +74,7 @@ export default function RootLayout({
               !function (w, d, t) {
                 w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
 
-                ttq.load('D1QOBFJC77U41SK2P3PG');
-                ttq.load('D1RMNC3C77U41FGAQFSG');
+                ttq.load('D21DVQRC77UE57DU58PG');
                 ttq.page();
               }(window, document, 'ttq');
             `,

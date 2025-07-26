@@ -139,7 +139,7 @@ body {
 }
 
 .progress-bar {
-  @apply h-full bg-blue-600 transition-all duration-100 ease-linear;
+  @apply h-full bg-[#ff0] transition-all duration-100 ease-linear;
 }
 
 .progress-container {

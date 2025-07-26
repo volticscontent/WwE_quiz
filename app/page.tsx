@@ -1,7 +1,7 @@
 "use client"
 
-import PSGQuiz from "../psg-quiz"
+import TourDeFranceQuiz from "../quiz"
 
 export default function Page() {
-  return <PSGQuiz />
+  return <TourDeFranceQuiz />
 }
