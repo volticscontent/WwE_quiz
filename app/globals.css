@@ -4,8 +4,8 @@
 
 @font-face {
   font-family: 'AdihausDIN';
-  src: url('/fonts/AdihausDIN-Regular.woff2') format('woff2'),
-       url('/fonts/AdihausDIN-Regular.woff') format('woff');
+  src: url('/fonts/montserrat-regular.woff2') format('woff2'),
+       url('/fonts/montserrat-regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -13,15 +13,15 @@
 
 @font-face {
   font-family: 'AdihausDIN';
-  src: url('/fonts/AdihausDIN-Bold.woff2') format('woff2'),
-       url('/fonts/AdihausDIN-Bold.woff') format('woff');
+  src: url('/fonts/montserrat-bold.woff2') format('woff2'),
+       url('/fonts/montserrat-bold.woff') format('woff');
   font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
 
 body {
-  font-family: 'AdihausDIN', Arial, Helvetica, sans-serif;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   font-feature-settings: normal;
 }
 
@@ -103,14 +103,6 @@ body {
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
 
 @keyframes fade-in {
   from {
@@ -136,12 +128,4 @@ body {
 @keyframes progressReverse {
   from { width: 0%; }
   to { width: 100%; }
-}
-
-.progress-bar {
-  @apply h-full bg-[#ff0] transition-all duration-100 ease-linear;
-}
-
-.progress-container {
-  @apply w-full bg-gray-200 h-2 rounded-full overflow-hidden;
 }

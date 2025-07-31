@@ -51,30 +51,30 @@ export async function captureTikTokClickId() {
         user_agent: navigator.userAgent
       }
 
-      const response = await axios.post(N8N_WEBHOOK_URL, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': N8N_WEBHOOK_KEY
-        },
-        timeout: 10000 // 10 segundos de timeout
-      })
+      try {
+        const response = await axios.post(N8N_WEBHOOK_URL, payload, {
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': N8N_WEBHOOK_KEY
+          },
+          timeout: 5000 // Reduced timeout for faster failure
+        })
 
-      if (response.status >= 200 && response.status < 300) {
-        return response.data
-      } else {
-        console.error('[TikTok Click ID] Error sending to n8n with axios:', response.status, response.data)
+        if (response.status >= 200 && response.status < 300) {
+          console.log('[TikTok Click ID] Successfully sent to n8n')
+          return response.data
+        } else {
+          console.warn('[TikTok Click ID] Unexpected response status:', response.status)
+        }
+      } catch (networkError: any) {
+        // Handle CORS and network errors gracefully without breaking the app
+        console.warn('[TikTok Click ID] Network/CORS error (non-critical):', networkError.message || networkError)
+        // Store the data locally as fallback
+        localStorage.setItem('pending_ttclid_data', JSON.stringify(payload))
       }
     }
   } catch (error) {
-    console.error('[TikTok Click ID] Error caught:', error)
-    if (axios.isAxiosError(error)) {
-      console.error('[TikTok Click ID] Axios error status:', error.response?.status)
-      console.error('[TikTok Click ID] Axios error data:', error.response?.data)
-      console.error('[TikTok Click ID] Axios error message:', error.message)
-      console.error('[TikTok Click ID] Axios error config:', error.config)
-    } else {
-      console.error('[TikTok Click ID] Network error:', error)
-    }
+    console.warn('[TikTok Click ID] General error (non-critical):', error)
   }
 }
 
@@ -137,7 +137,7 @@ export function trackEvent(eventName: string, parameters?: Record<string, any>, 
 
 // Função específica para rastrear steps do quiz
 export function trackQuizStep(step: string, questionNumber?: number, isCorrect?: boolean) {
-  const stepKey = `quiz_step_${step}${questionNumber ? `_${questionNumber}` : ''}`
+  const stepKey = `quiz_${step}${questionNumber ? `_${questionNumber}` : ''}`
   
   const parameters: Record<string, any> = {}
   

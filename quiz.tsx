@@ -1,21 +1,16 @@
 "use client"
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
-import { Trophy, DollarSign, Star } from "lucide-react"
+import { Trophy, DollarSign } from "lucide-react"
 import Image from "next/image"
 import PriceAnchoring from "@/components/price-anchoring"
-import Script from "next/script"
-import Head from "next/head"
 import styles from '@/styles/animations.module.css'
-import PartnersFooter from "@/components/partners-footer"
-import { trackEvent as trackPixelEvent, trackQuizStep, useTikTokClickIdCapture } from "@/lib/utils"
+import { trackQuizStep, useTikTokClickIdCapture } from "@/lib/utils"
 
-// Adicionar animação keyframes para a barra de progresso
+// Add animated border keyframes for progress
 const progressBarStyles = `
   @keyframes progress {
     from { width: 100%; }
@@ -25,6 +20,60 @@ const progressBarStyles = `
   @keyframes progressReverse {
     from { width: 0%; }
     to { width: 100%; }
+  }
+
+  @keyframes borderGlow {
+    0% {
+      border-color: #ff0000;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+    25% {
+      border-color: #ff6600;
+      box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
+    }
+    50% {
+      border-color: #ffff00;
+      box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+    }
+    75% {
+      border-color: #ff6600;
+      box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
+    }
+    100% {
+      border-color: #ff0000;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+  }
+
+  .animated-border {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .animated-border::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ff0000, #ff6600, #ffff00, #ff6600, #ff0000);
+    background-size: 300% 300%;
+    border-radius: 14px;
+    z-index: -1;
+    animation: borderAnimation 3s ease-in-out infinite;
+  }
+
+  @keyframes borderAnimation {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
   .progress-container {
@@ -37,7 +86,7 @@ const progressBarStyles = `
 
   .progress-bar {
     height: 100%;
-    background: linear-gradient(to right, #ff0, #fbff00);
+    background: linear-gradient(to right, #ca2020, #ff0000);
     border-radius: 9999px;
     transition: width 0.1s linear;
   }
@@ -65,31 +114,31 @@ interface Question {
 const questions: Question[] = [
   {
     id: 1,
-    question: "Qui a remporté le Tour de France en 2023 ?",
-    options: ["Jonas Vingegaard", "Tadej Pogačar", "Remco Evenepoel", "Chris Froome"],
+    question: "Which WWE Superstar are you most excited to see at SummerSlam 2025?",
+    options: ["John Cena", "Cody Rhodes", "Roman Reigns", "CM Punk"],
     correct: 0,
-    explanation: "Jonas Vingegaard a remporté le Tour de France en 2023 !",
+    explanation: "John Cena's farewell tour makes SummerSlam 2025 truly special!",
   },
   {
     id: 2,
-    question: "Combien d'étapes compte traditionnellement le Tour de France ?",
-    options: ["21", "15", "25", "18"],
+    question: "What's your favorite WWE match type?",
+    options: ["Hell in a Cell", "Royal Rumble", "Ladder Match", "Steel Cage"],
     correct: 0,
-    explanation: "Le Tour de France compte traditionnellement 21 étapes sur 3 semaines !",
+    explanation: "Hell in a Cell matches create the most memorable moments!",
   },
   {
     id: 3,
-    question: "Quelle couleur représente le leader du classement général ?",
-    options: ["Jaune", "Vert", "Blanc", "Rouge"],
+    question: "Which WWE era do you prefer?",
+    options: ["Attitude Era", "Ruthless Aggression", "PG Era", "Modern Era"],
     correct: 0,
-    explanation: "Le Maillot Jaune représente le leader du classement général du Tour de France !",
+    explanation: "The Attitude Era brought us legendary superstars and unforgettable moments!",
   },
   {
     id: 4,
-    question: "Pour quelle équipe roule Tadej Pogačar en 2025 ?",
-    options: ["UAE Team Emirates", "Ineos Grenadiers", "Jumbo-Visma", "Bora-Hansgrohe"],
+    question: "What WWE merchandise do you collect most?",
+    options: ["T-shirts", "Championships", "Action Figures", "Posters"],
     correct: 0,
-    explanation: "Tadej Pogačar roule pour l'équipe UAE Team Emirates !",
+    explanation: "T-shirts are the perfect way to show your WWE pride everywhere!",
   },
 ]
 
@@ -149,8 +198,8 @@ const SuccessNotification = ({ show, onClose }: { show: boolean; onClose: () => 
           <DollarSign className="h-8 w-8 text-green-500 animate-bounce" />
         </div>
         <div>
-          <p className="font-bold text-lg">Félicitations ! 🎉</p>
-          <p className="text-sm opacity-90">Vous avez gagné 25€ de réduction !</p>
+          <p className="font-bold text-lg">Congratulations! 🎉</p>
+          <p className="text-sm opacity-90">You earned a $25 discount!</p>
         </div>
         <button 
           onClick={onClose}
@@ -233,27 +282,10 @@ const LikeSystem = () => {
 
   return (
     <div className="relative">
-      {/* Seção de ícones e avaliações */}
-      <div className="flex items-center justify-center gap-6 mb-4">
-        {/* Trustpilot */}
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-1 mb-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <svg key={star} className="w-4 h-4 text-[#00b67a]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-              </svg>
-            ))}
-          </div>
-          <span className="text-[11px] text-black">Trustpilot</span>
-        </div>
+      {/* Section for icons and ratings */}
+      <div className="flex items-center justify-center">
 
-        {/* Separador vertical */}
-        <div className="h-8 w-px bg-white/10"></div>
-
-        {/* Separador vertical */}
-        <div className="h-8 w-px bg-white/10"></div>
-
-        {/* Botão de curtir */}
+        {/* Like button */}
         <button
           onClick={handleLike}
           className={`flex items-center gap-2 transition-all duration-300 ${
@@ -278,13 +310,13 @@ const LikeSystem = () => {
         </div>
       )}
 
-      {/* Fotos das pessoas que curtiram */}
+      {/* Photos of people who liked */}
       {showPeople && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full animate-scaleIn">
             <div className="text-center mb-4">
-              <h3 className="text-lg font-semibold text-black mb-2">Personnes qui ont aimé ❤️</h3>
-              <p className="text-sm text-gray-600">Rejoignez {likeCount.toLocaleString()} fans !</p>
+              <h3 className="text-lg font-semibold text-black mb-2">People who liked ❤️</h3>
+              <p className="text-sm text-gray-600">Join {likeCount.toLocaleString()} fans!</p>
             </div>
             
             <div className="grid grid-cols-3 gap-4 mb-6">
@@ -310,7 +342,7 @@ const LikeSystem = () => {
               onClick={() => setShowPeople(false)}
               className="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-medium transition-colors duration-200"
             >
-              Fermer
+              Close
             </button>
           </div>
         </div>
@@ -328,11 +360,60 @@ const LoadingSpinner = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   }
   
   return (
-    <div className={`${sizeClasses[size]} animate-spin rounded-full border-2 border-gray-300 border-t-blue-600`}></div>
+    <div className={`${sizeClasses[size]} animate-spin rounded-full border-2 border-[#f00] border-t-white`}></div>
   )
 }
 
-// Componente de vídeo simplificado
+// Carrossel de imagens para substituir o VSL
+const ImageCarousel = () => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = ["/1.png", "/2.png", "/3.png"];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    }, 1000); // Troca a imagem a cada 3 segundos
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative w-full" style={{ paddingBottom: '95%' }}>
+      <div className="absolute inset-0 rounded-xl overflow-hidden">
+        {images.map((image, index) => (
+          <Image
+            key={index}
+            src={image}
+            alt={`WWE SummerSlam Image ${index + 1}`}
+            fill
+            className={`object-cover transition-opacity duration-1000 ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{ borderRadius: '25px' }}
+          />
+        ))}
+      </div>
+      
+      {/* Indicadores de pontos */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        {images.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentImageIndex(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              index === currentImageIndex 
+                ? 'bg-white shadow-lg' 
+                : 'bg-white/50 hover:bg-white/75'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Componente de vídeo simplificado - COMENTADO
+/*
 const VideoPlayer = React.memo(({ isReady }: { isReady: boolean }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
@@ -349,7 +430,7 @@ const VideoPlayer = React.memo(({ isReady }: { isReady: boolean }) => {
           video.muted = true;
           setIsMuted(true);
           video.play().catch(() => {
-            console.log("Impossible de démarrer la vidéo automatiquement");
+            console.log("Unable to start video automatically");
           });
         });
       }
@@ -371,7 +452,7 @@ const VideoPlayer = React.memo(({ isReady }: { isReady: boolean }) => {
       videoRef.current.muted = !videoRef.current.muted;
       setIsMuted(videoRef.current.muted);
       if (!videoRef.current.muted) {
-        // Se foi desmutado, esconde o botão após um pequeno delay
+        // If unmuted, hide button after small delay
         setTimeout(() => {
           setShowMuteButton(false);
         }, 500);
@@ -439,6 +520,7 @@ const VideoPlayer = React.memo(({ isReady }: { isReady: boolean }) => {
 });
 
 VideoPlayer.displayName = 'VideoPlayer';
+*/
 
 // Componente de Layout para os scripts simplificado - removido pois já está no layout global
 // const PixelScripts = () => (
@@ -490,7 +572,8 @@ const usePixelLoader = () => {
   return isPixelsReady;
 };
 
-// Rastrear visualização da VSL apenas uma vez globalmente
+// Rastrear visualização da VSL apenas uma vez globalmente - COMENTADO
+/*
 const useTrackVSLView = () => {
   useEffect(() => {
     setTimeout(() => {
@@ -498,6 +581,7 @@ const useTrackVSLView = () => {
     }, 1000);
   }, []);
 };
+*/
 
 // Hook personalizado para gerenciar elementos escondidos (não é mais necessário)
 function useDelayedElements() {
@@ -577,11 +661,11 @@ const USPPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void })
       <div className="bg-white w-full max-w-4xl mt-12 mx-4">
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-4">
-          <div className="text-xs font-medium uppercase tracking-[0.25em] text-black">Tour de France</div>
+          <div className="text-xs font-medium uppercase tracking-[0.25em] text-black">WWE SummerSlam</div>
           <button 
             onClick={onClose}
             className="p-2 hover:bg-gray-50 transition-colors duration-150"
-            aria-label="Fermer"
+            aria-label="Close"
           >
             <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
@@ -593,41 +677,41 @@ const USPPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void })
         <div className="grid md:grid-cols-3 gap-px bg-gray-100">
           {/* History */}
           <div className="p-12 text-center bg-white">
-            <div className="text-xs text-gray-400 uppercase tracking-[0.2em] mb-6">Créé en 1903</div>
+            <div className="text-xs text-gray-400 uppercase tracking-[0.2em] mb-6">Since 1988</div>
             <div className="text-sm text-gray-900 mb-2 leading-relaxed">
-              La Grande Boucle
+              The Biggest Party
             </div>
             <div className="text-xs text-gray-500">
-              France
+              Of The Summer
             </div>
           </div>
 
           {/* Achievements */}
           <div className="p-12 text-center bg-white">
-            <div className="text-xs text-gray-400 uppercase tracking-[0.2em] mb-6">Légende</div>
+            <div className="text-xs text-gray-400 uppercase tracking-[0.2em] mb-6">Legend</div>
             <div className="text-sm text-gray-900 mb-2 leading-relaxed">
-              21 Étapes
+              John Cena
             </div>
             <div className="text-xs text-gray-500">
-              3 Semaines
+              Farewell Tour
             </div>
           </div>
 
           {/* Legacy */}
           <div className="p-12 text-center bg-white">
-            <div className="text-xs text-gray-400 uppercase tracking-[0.2em] mb-6">Tradition</div>
+            <div className="text-xs text-gray-400 uppercase tracking-[0.2em] mb-6">Champion</div>
             <div className="text-sm text-gray-900 mb-2 leading-relaxed">
-              Maillot Jaune
+              Cody Rhodes
             </div>
             <div className="text-xs text-gray-500">
-              Depuis 1919
+              American Nightmare
             </div>
           </div>
         </div>
 
         {/* Footer */}
         <div className="px-8 py-6 text-center">
-          <div className="text-xs text-gray-400 uppercase tracking-[0.2em]">La Plus Grande Course du Monde</div>
+          <div className="text-xs text-gray-400 uppercase tracking-[0.2em]">The Biggest Event of the Summer</div>
         </div>
       </div>
     </div>
@@ -637,9 +721,9 @@ const USPPanel = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void })
 // Componente do carrossel do header com largura ajustada
 const HeaderCarousel = () => {
   const messages = [
-    "Allez-y",
-    "Exclusif",
-    "Collection Officielle"
+    "You Can't See Me",
+    "Exclusive",
+    "Official Collection"
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -654,13 +738,13 @@ const HeaderCarousel = () => {
   return (
     <div className="relative w-full overflow-hidden">
       <div className="relative">
-        {/* Gradiente da esquerda */}
+        {/* Left gradient */}
         <div className="absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-white to-transparent z-10"></div>
         
-        {/* Gradiente da direita */}
+        {/* Right gradient */}
         <div className="absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent z-10"></div>
         
-        {/* Mensagens do carrossel */}
+        {/* Carousel messages */}
         <div className="relative">
           <div className="flex justify-center items-center min-h-[2rem] overflow-hidden">
             {messages.map((message, index) => (
@@ -714,25 +798,6 @@ const HeartIcon = ({ isLiked, onClick }: { isLiked: boolean; onClick: () => void
         </div>
       )}
       
-      <button
-        onClick={handleClick}
-        className="relative p-2 rounded-lg transition-colors duration-200 group"
-        aria-label="Like"
-      >
-        <svg
-          className={`w-8 h-8 border-1 transition-all duration-300 ${isLiked ? styles.heartPop : ''}`}
-          viewBox="0 0 24 24"
-          fill={isLiked ? '#ff0' : 'none'}
-          stroke={isLiked ? '#000000' : 'currentColor'}
-          strokeWidth="0.4"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-          />
-        </svg>
-      </button>
     </div>
   );
 };
@@ -755,10 +820,10 @@ const CompleteHeader = ({ onUSPClick }: { onUSPClick: () => void }) => {
   return (
     <header data-auto-id="header" className="bg-white font-size-12 border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       {/* USP Bar */}
-     <div className="w-full bg-[#ff0] border-b border-gray-200 hover:bg-gray-800 transition-colors duration-200 py-2 group">
+     <div className="w-full bg-[#000000] border-b border-gray-200 transition-colors duration-200 py-2 group">
       <div className="flex items-center justify-center space-x-2 px-4">
-        <div className="text-sm font-medium text-[#141414] uppercase tracking-wide">
-          Faites le quiz et obtenez jusqu'à €100 
+        <div className="text-sm font-medium text-[#ffffff] uppercase tracking-wide">
+          Take the quiz and get up to $100 off
         </div>
       </div>
      </div>
@@ -768,13 +833,13 @@ const CompleteHeader = ({ onUSPClick }: { onUSPClick: () => void }) => {
         {/* Top Navigation */}
         <nav className="hidden md:block border-b border-gray-100" aria-label="Customer information">
           <ul className="flex justify-end space-x-6 py-2 px-4 text-sm" data-auto-id="header-top">
-            <li><a href="#" className="text-gray-700 hover:text-gray-900 transition-colors duration-200">aide</a></li>
-            <li><a href="#" className="text-gray-700 hover:text-gray-900 transition-colors duration-200">commandes et retours</a></li>
-            <li><a href="#" className="text-gray-700 hover:text-gray-900 transition-colors duration-200">cartes cadeaux</a></li>
-            <li><button className="text-gray-700 hover:text-gray-900 transition-colors duration-200">rejoindre le tour de france</button></li>
+            <li><a href="#" className="text-gray-700 hover:text-gray-900 transition-colors duration-200">help</a></li>
+            <li><a href="#" className="text-gray-700 hover:text-gray-900 transition-colors duration-200">orders and returns</a></li>
+            <li><a href="#" className="text-gray-700 hover:text-gray-900 transition-colors duration-200">gift cards</a></li>
+            <li><button className="text-gray-700 hover:text-gray-900 transition-colors duration-200">join wwe universe</button></li>
             <li>
-              <button aria-label="Changer la localisation ou la langue" className="flex items-center text-gray-700 hover:text-gray-900 transition-colors duration-200">
-                <img alt="drapeau france" src="https://adl-foundation.adidas.com/flags/1-2-1/fr.svg" className="w-4 h-3 mr-1" />
+              <button aria-label="Change location or language" className="flex items-center text-gray-700 hover:text-gray-900 transition-colors duration-200">
+                <img alt="usa flag" src="https://adl-foundation.adidas.com/flags/1-2-1/us.svg" className="w-4 h-3 mr-1" />
               </button>
             </li>
           </ul>
@@ -784,10 +849,10 @@ const CompleteHeader = ({ onUSPClick }: { onUSPClick: () => void }) => {
         <div className="flex items-center justify-between py-2 px-5" data-auto-id="header-bottom">
           {/* Logo */}
           <a href="#" aria-label="Homepage" className="flex items-center hover:opacity-80 transition-opacity duration-200" data-auto-id="logo">
-            <img src="/tdf/france.png" alt="Drapeau France" className="w-10 h-10" />
+            <img src="/logo.svg" alt="Drapeau France" className="w-10 h-10" />
           </a>
 
-          {/* Carrossel de mensagens */}
+          {/* Carousel of messages */}
           <div className="flex-1 mx-8">
             <HeaderCarousel />
           </div>
@@ -806,7 +871,7 @@ const CompleteHeader = ({ onUSPClick }: { onUSPClick: () => void }) => {
 };
 
 // Remover o MinimalHeader e USPHeader antigos e usar apenas o CompleteHeader
-export default function TourDeFranceQuiz() {
+export default function WWESummerSlamQuiz() {
   const [gameStarted, setGameStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState("");
@@ -829,9 +894,9 @@ export default function TourDeFranceQuiz() {
   }, []);
 
   // Usar o hook de captura do ttclid
-  console.log('[TourDeFranceQuiz] Chamando useTikTokClickIdCapture...')
+  console.log('[WWESummerSlamQuiz] Calling useTikTokClickIdCapture...')
   useTikTokClickIdCapture();
-  console.log('[TourDeFranceQuiz] useTikTokClickIdCapture chamado')
+  console.log('[WWESummerSlamQuiz] useTikTokClickIdCapture called')
 
   const isPixelsReady = usePixelLoader()
   const { playSound, isInitialized: audioInitialized } = useAudioSystem();
@@ -858,7 +923,7 @@ export default function TourDeFranceQuiz() {
           }
           return newValue;
         });
-      }, 100); // 10 segundos total (100 * 100ms = 10000ms)
+      }, 100); // 10 seconds total (100 * 100ms = 10000ms)
     }
 
     return () => {
@@ -911,10 +976,17 @@ export default function TourDeFranceQuiz() {
   }
 
   // Função para lidar com o clique no botão de compra
-  const handleBuyNowClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleBuyNowClick = (selectedKit: string) => {
     trackQuizStep('go_to_store'); // Evento final - ir para a loja
-    const newWindow = window.open("https://www.letourdefrance.shop/", "_blank");
+    
+    // Links dos produtos baseados no kit selecionado
+    const productLinks = {
+      "john-cena": "https://wwefanstore.shop/john-cena-kit",
+      "cody-rhodes": "https://wwefanstore.shop/cody-rhodes-kit"
+    };
+    
+    const url = productLinks[selectedKit as keyof typeof productLinks] || productLinks["john-cena"];
+    const newWindow = window.open(url, "_blank");
     if (newWindow) newWindow.opener = null;
   }
 
@@ -923,9 +995,20 @@ export default function TourDeFranceQuiz() {
     if (isSubmitting) return
     
     // Verificar se temos uma pergunta válida
+    if (currentQuestion < 0 || currentQuestion >= questions.length) {
+      console.error('Current question index out of bounds:', currentQuestion, 'Total questions:', questions.length);
+      return;
+    }
+    
     const currentQuestionData = questions[currentQuestion];
     if (!currentQuestionData) {
       console.error('Pergunta atual não encontrada');
+      return;
+    }
+    
+    // Verificar se uma resposta foi selecionada
+    if (selectedAnswer === '' || selectedAnswer === null) {
+      console.warn('No answer selected, skipping...');
       return;
     }
     
@@ -936,7 +1019,7 @@ export default function TourDeFranceQuiz() {
     // Sempre incrementar o contador, independente da resposta estar correta
     setCorrectAnswers(prev => {
       const newValue = prev + 1;
-      console.log('Desconto atualizado:', newValue);
+      console.log('Discount updated:', newValue);
       return newValue;
     });
 
@@ -990,7 +1073,7 @@ export default function TourDeFranceQuiz() {
   const originalPrice = 147.0
   const finalPrice = Math.max(originalPrice - discount, 47.0)
 
-  useTrackVSLView();
+  // useTrackVSLView(); // Comentado junto com o VSL
 
   // Rastrear visualização da página final
   useEffect(() => {
@@ -1009,44 +1092,44 @@ export default function TourDeFranceQuiz() {
           <div className="flex-grow">
             <div className="container mx-auto px-4 py-8">
               <div className="text-center mb-10 animate-fadeIn">
-                <h1 className="text-4xl font-normal font-product-sans text-gray-900">Message du Tour de France</h1>
+                <h1 className="text-4xl font-normal font-product-sans text-gray-900">Message from WWE SummerSlam</h1>
               </div>
               
-              <div className="space-y-8">
+              <div className="space-y-10">
                 <div className="animate-scaleIn">
-                  <VideoPlayer isReady={true} />
+                  {/* <VideoPlayer isReady={true} /> */}
+                  <ImageCarousel />
                 </div>
 
                 <LikeSystem />
 
-                <div className="bg-gradient-to-r font-product-sans font-bold from-[#ff0] via-[#ff0] to-[#ff0] border-[0.1px] p-5 rounded-xl shadow-sm animate-slideIn">
-                  <blockquote className="text-sm md:text-lg text-[#252525] italic text-center leading-relaxed">
-                    "Répondez aux 4 questions et obtenez jusqu'à 100€ de réduction sur le maillot signé !"
+                <div className="bg-gradient-to-br font-product-sans from-[#000000da] via-[#130000da] to-[#000000] border-[2px] p-3 rounded-xl shadow-sm animate-slideIn animated-border">
+                  <blockquote className="text-xl md:text-lg text-[#ffffff] text-center leading-relaxed">
+                    "Answer 4 questions and get up to $100 off the signed merchandise!"
                   </blockquote>
                 </div>
 
                 <Button
                   onClick={handleStartQuiz}
                   disabled={isLoading}
-                  className="w-full bg-[#000000] hover:bg-gray-800 disabled:bg-gray-400 text-white text-xl py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3"
+                  className="w-full bg-[#ffffff] border-2 border-black hover:border-[#f00] hover:bg-[#f00] text-black hover:text-white text-xl py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3"
                   size="lg"
                 >
                   {isLoading ? (
                     <>
                       <LoadingSpinner size="md" />
-                      Démarrage du Quiz...
+                      Starting Quiz...
                     </>
                   ) : (
                     <>
                       <Trophy className="h-6 w-6" />
-                      Commencer le Quiz
+                      Start Quiz
                     </>
                   )}
                 </Button>
               </div>
             </div>
           </div>
-          <PartnersFooter />
         </div>
       </>
     );
@@ -1058,37 +1141,20 @@ export default function TourDeFranceQuiz() {
         <div className="min-h-screen bg-white flex flex-col">
           <CompleteHeader onUSPClick={handleUSPClick} />
           <USPPanel isOpen={showUSPPanel} onClose={handleUSPClose} />
-          <div className="flex-grow container mx-auto px-4 py-8">
-            <div className="space-y-8">
-              <div className="transform transition-all duration-500 hover:scale-105">
-                <PriceAnchoring correctAnswers={correctAnswers} />
+          <div className="flex-grow container mx-auto px-4">
+            <div className="space-y-30">
+              <div className="transform transition-all duration-500">
+                <PriceAnchoring correctAnswers={correctAnswers} onBuyClick={handleBuyNowClick} />
               </div>
 
               <div className="flex flex-col gap-4">
-                <Button
-                  className="bg-[#ff0] hover:bg-[#c0c025] text-black w-full py-6 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-                  size="lg"
-                  onClick={handleBuyNowClick}
-                >
-                  <DollarSign className="mr-2 h-5 w-5" />
-                  Acheter Maintenant
-                </Button>
-                
-                {/* Barra de progresso da réduction */}
+                {/* Discount progress bar */}
                 <DiscountProgressBar correctAnswers={correctAnswers} />
                 
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="w-full border-2 bg-black text-white hover:bg-gray-50 hover:text-black transition-all duration-200 py-6" 
-                  onClick={handleRestart}
-                >
-                  🔄 Recommencer
-                </Button>
               </div>
             </div>
           </div>
-          <PartnersFooter />
+          <BasicFooter />
         </div>
       </>
     )
@@ -1099,37 +1165,31 @@ export default function TourDeFranceQuiz() {
       <div className="min-h-screen bg-white flex flex-col">
         <CompleteHeader onUSPClick={handleUSPClick} />
         <USPPanel isOpen={showUSPPanel} onClose={handleUSPClose} />
-        <div className="flex-grow container mx-auto px-4 pt-8 flex items-center justify-center" style={{ minHeight: 'calc(100vh - 140px)' }}>
+        <div className="flex-grow container mx-auto px-4 flex items-center justify-center" style={{ minHeight: 'calc(100vh - 140px)' }}>
           <SuccessNotification show={showNotification} onClose={() => setShowNotification(false)} />
 
           <div className="w-full max-w-2xl">
             <div className="mb-8 animate-fadeIn">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-lg overflow-hidden ring-2 ring-blue-200">
+                  <div className="rounded-lg overflow-hidden">
                     <Image
-                      src="/tdf/product_images/angle_2_product.jpg"
-                      alt="Maillot Officiel Tour de France"
-                      width={40}
+                      src="/WWE_SummerSlam_logo_2023 (1).png"
+                      alt="Men's Blue John Cena Farewell Tour SummerSlam 2025 T-Shirt"
+                      width={120}
                       height={40}
-                      className="w-full h-full object-cover"
+                      className="w-35 h-15 object-cover"
                     />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">Quiz Tour de France</h2>
-                    <p className="text-gray-600">
-                      Question {currentQuestion + 1} sur {questions.length}
-                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-600">Votre réduction</p>
+                  <p className="text-sm text-gray-600">Your discount</p>
                   <p className={`mr-10 text-2xl font-bold text-green-600 transform transition-all duration-500 ${
                     correctAnswers > 0 ? 'scale-125 animate-pulse' : ''
                   }`}>
-                    {correctAnswers * 25}€
+                    ${correctAnswers * 25}
                   </p>
-                  <p className="text-xs text-gray-500">Récompense de participation</p>
+                  <p className="text-xs text-gray-500">Participation reward</p>
                 </div>
               </div>
               {gameStarted && !quizCompleted && (
@@ -1145,8 +1205,8 @@ export default function TourDeFranceQuiz() {
             <div className="space-y-8">
               <div className="animate-slideIn">
                 {questions[currentQuestion] && (
-                  <div className="bg-gray-50 p-8 rounded-xl border shadow-sm transition-all duration-300 hover:shadow-md mb-6">
-                    <h3 className="text-xl font-semibold mb-6 text-gray-900">{questions[currentQuestion].question}</h3>
+                  <div className="bg-[#ffffff] p-8 rounded-xl border shadow-sm transition-all duration-300 hover:shadow-md mb-6">
+                    <h3 className="text-xl font-semibold mb-6 text-black">{questions[currentQuestion].question}</h3>
 
                     <RadioGroup value={selectedAnswer} onValueChange={setSelectedAnswer} className="space-y-4">
                       {questions[currentQuestion].options.map((option: string, index: number) => (
@@ -1154,12 +1214,12 @@ export default function TourDeFranceQuiz() {
                           key={index}
                           className={`flex items-center space-x-3 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
                             selectedAnswer === index.toString() 
-                              ? 'bg-gray-50 border-gray-300 shadow-sm transform scale-105' 
-                              : 'hover:bg-gray-100 border-gray-200 hover:transform hover:scale-102'
+                              ? 'bg-gray-100 shadow-sm transform scale-105' 
+                              : 'bg-gray-100 hover:transform hover:scale-102'
                           }`}
                         >
                           <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                          <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer font-medium">
+                          <Label htmlFor={`option-${index}`} className="flex-1 text-black cursor-pointer font-medium">
                             {option}
                           </Label>
                         </div>
@@ -1181,17 +1241,17 @@ export default function TourDeFranceQuiz() {
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <LoadingSpinner size="sm" />
-                      Traitement...
+                      Processing...
                     </div>
                   ) : (
-                    "Confirmer la Réponse"
+                    "Confirm Answer"
                   )}
                 </Button>
 
-                {/* Barra de progresso do quiz */}
+                {/* Quiz progress bar */}
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-600">Progression du quiz :</span>
+                    <span className="text-sm text-gray-600">Quiz progress:</span>
                     <span className="font-semibold">{currentQuestion + 1} / {questions.length}</span>
                   </div>
                   <div 
@@ -1202,7 +1262,7 @@ export default function TourDeFranceQuiz() {
                     className="relative h-3 w-full overflow-hidden rounded-full bg-gray-200"
                   >
                     <div 
-                      className="h-full bg-[#ff0] transition-all duration-300 ease-out" 
+                      className="h-full bg-gradient-to-r from-[#ff0000] to-[#ff0000] transition-all duration-300 ease-out" 
                       style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
                     />
                   </div>
@@ -1211,13 +1271,12 @@ export default function TourDeFranceQuiz() {
             </div>
           </div>
         </div>
-        <PartnersFooter />
       </div>
     </>
   )
 }
 
-// Componente da barra de progresso da réduction
+// Discount progress bar component
 const DiscountProgressBar = ({ correctAnswers }: { correctAnswers: number }) => {
   const discount = correctAnswers * 25;
   const maxDiscount = 100;
@@ -1226,8 +1285,8 @@ const DiscountProgressBar = ({ correctAnswers }: { correctAnswers: number }) => 
   return (
     <div className="bg-gray-50 p-4 rounded-lg">
       <div className="flex justify-between items-center">
-        <span className="text-sm text-gray-600">Progression de la réduction :</span>
-        <span className="font-semibold">{discount}€ / {maxDiscount}€</span>
+        <span className="text-sm text-gray-600">Discount progress:</span>
+        <span className="font-semibold">${discount} / ${maxDiscount}</span>
       </div>
       <div 
         aria-valuemax={100} 
@@ -1237,10 +1296,28 @@ const DiscountProgressBar = ({ correctAnswers }: { correctAnswers: number }) => 
         className="relative h-4 w-full overflow-hidden rounded-full bg-gray-200 mt-2"
       >
         <div 
-          className="h-full bg-[#ff0] transition-all duration-500 ease-out" 
+          className="h-full bg-gradient-to-r from-[#ff0000] to-[#ff0000] transition-all duration-500 ease-out" 
           style={{ width: `${progressPercentage}%` }}
         />
       </div>
     </div>
   );
 };
+
+// Basic WWE footer component
+const BasicFooter = () => (
+  <footer className="bg-white">
+    <div className="container mx-auto px-4">
+      <div className="text-center">
+        <div className="mb-4">
+          <h3 className="text-xl font-bold mb-2">WWE SummerSlam 2025</h3>
+          <p className="text-gray-900">The Biggest Party of the Summer</p>
+        </div>
+        <div className="border-t border-gray-700 pt-4 text-sm text-gray-400">
+          <p>&copy; 2024 World Wrestling Entertainment, Inc. All rights reserved.</p>
+          <p className="mt-1">WWE and all related characters and elements are trademarks of WWE.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+);
