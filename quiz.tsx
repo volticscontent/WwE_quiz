@@ -45,6 +45,34 @@ const progressBarStyles = `
     }
   }
 
+  @keyframes discountShine {
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 100% 0;
+    }
+  }
+
+  .discount-progress-bar {
+    background: linear-gradient(90deg, #88ff59, #1eff00, #88ff59);
+    background-size: 200% 100%;
+    animation: discountShine 2s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .discount-progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: discountShine 2s ease-in-out infinite;
+  }
+
   .animated-border {
     position: relative;
     overflow: hidden;
@@ -283,8 +311,8 @@ const LikeSystem = () => {
   return (
     <div className="relative">
       {/* Section for icons and ratings */}
-      <div className="flex items-center justify-center">
-
+      <div className="flex items-center justify-center space-x-20">
+        <img src="/WWE_SummerSlam_logo_2023 (1).png" alt="Like" className="w-15 h-9" />
         {/* Like button */}
         <button
           onClick={handleLike}
@@ -364,7 +392,8 @@ const LoadingSpinner = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   )
 }
 
-// Carrossel de imagens para substituir o VSL
+// Carrossel de imagens para substituir o VSL - COMENTADO
+/*
 const ImageCarousel = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const images = ["/1.png", "/2.png", "/3.png"];
@@ -372,13 +401,13 @@ const ImageCarousel = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
-    }, 1000); // Troca a imagem a cada 3 segundos
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="relative w-full" style={{ paddingBottom: '95%' }}>
+    <div className="relative w-full" style={{ paddingBottom: '75%' }}>
       <div className="absolute inset-0 rounded-xl overflow-hidden">
         {images.map((image, index) => (
           <Image
@@ -394,7 +423,6 @@ const ImageCarousel = () => {
         ))}
       </div>
       
-      {/* Indicadores de pontos */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {images.map((_, index) => (
           <button
@@ -411,9 +439,9 @@ const ImageCarousel = () => {
     </div>
   );
 };
+*/
 
-// Componente de vídeo simplificado - COMENTADO
-/*
+// Componente de vídeo simplificado
 const VideoPlayer = React.memo(({ isReady }: { isReady: boolean }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
@@ -520,7 +548,6 @@ const VideoPlayer = React.memo(({ isReady }: { isReady: boolean }) => {
 });
 
 VideoPlayer.displayName = 'VideoPlayer';
-*/
 
 // Componente de Layout para os scripts simplificado - removido pois já está no layout global
 // const PixelScripts = () => (
@@ -572,8 +599,7 @@ const usePixelLoader = () => {
   return isPixelsReady;
 };
 
-// Rastrear visualização da VSL apenas uma vez globalmente - COMENTADO
-/*
+// Rastrear visualização da VSL apenas uma vez globalmente
 const useTrackVSLView = () => {
   useEffect(() => {
     setTimeout(() => {
@@ -581,7 +607,6 @@ const useTrackVSLView = () => {
     }, 1000);
   }, []);
 };
-*/
 
 // Hook personalizado para gerenciar elementos escondidos (não é mais necessário)
 function useDelayedElements() {
@@ -963,7 +988,7 @@ export default function WWESummerSlamQuiz() {
     setShowUSPPanel(false)
   }
 
-  // Modificar a função de início do quiz com loading
+  // Modificar a função de início do quiz com loading e scroll automático
   const handleStartQuiz = () => {
     setIsLoading(true)
     trackQuizStep('quiz_start'); // Rastrear início do quiz
@@ -972,6 +997,8 @@ export default function WWESummerSlamQuiz() {
     setTimeout(() => {
       setGameStarted(true)
       setIsLoading(false)
+      // Scroll automático para o topo ao iniciar quiz
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 800)
   }
 
@@ -990,7 +1017,7 @@ export default function WWESummerSlamQuiz() {
     if (newWindow) newWindow.opener = null;
   }
 
-  // Modificar a função de resposta com loading
+  // Modificar a função de resposta com loading e scroll automático
   const handleAnswer = () => {
     if (isSubmitting) return
     
@@ -1035,9 +1062,13 @@ export default function WWESummerSlamQuiz() {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion((prev) => prev + 1)
         setSelectedAnswer("")
+        // Scroll automático para o topo ao avançar pergunta
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         setQuizCompleted(true)
         trackQuizStep('quiz_completed'); // Rastrear conclusão do quiz
+        // Scroll automático para o topo ao completar quiz
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       setIsSubmitting(false)
     }, 600)
@@ -1067,13 +1098,15 @@ export default function WWESummerSlamQuiz() {
     setCorrectAnswers(0);
     setQuizCompleted(false);
     setShowNotification(false);
+    // Scroll automático para o topo ao reiniciar quiz
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const discount = correctAnswers * 25
   const originalPrice = 147.0
   const finalPrice = Math.max(originalPrice - discount, 47.0)
 
-  // useTrackVSLView(); // Comentado junto com o VSL
+  useTrackVSLView(); // Comentado junto com o VSL
 
   // Rastrear visualização da página final
   useEffect(() => {
@@ -1095,10 +1128,10 @@ export default function WWESummerSlamQuiz() {
                 <h1 className="text-4xl font-normal font-product-sans text-gray-900">Message from WWE SummerSlam</h1>
               </div>
               
-              <div className="space-y-10">
+              <div className="space-y-20  ">
                 <div className="animate-scaleIn">
                   {/* <VideoPlayer isReady={true} /> */}
-                  <ImageCarousel />
+                  <VideoPlayer isReady={true} />
                 </div>
 
                 <LikeSystem />
@@ -1141,7 +1174,7 @@ export default function WWESummerSlamQuiz() {
         <div className="min-h-screen bg-white flex flex-col">
           <CompleteHeader onUSPClick={handleUSPClick} />
           <USPPanel isOpen={showUSPPanel} onClose={handleUSPClose} />
-          <div className="flex-grow container mx-auto px-4">
+          <div className="flex-grow container mx-auto px-4 py-12">
             <div className="space-y-30">
               <div className="transform transition-all duration-500">
                 <PriceAnchoring correctAnswers={correctAnswers} onBuyClick={handleBuyNowClick} />
@@ -1184,7 +1217,7 @@ export default function WWESummerSlamQuiz() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Your discount</p>
-                  <p className={`mr-10 text-2xl font-bold text-green-600 transform transition-all duration-500 ${
+                  <p className={`mr-4 text-2xl font-bold text-[#4dca1b] transform transition-all duration-500 ${
                     correctAnswers > 0 ? 'scale-125 animate-pulse' : ''
                   }`}>
                     ${correctAnswers * 25}
@@ -1205,17 +1238,17 @@ export default function WWESummerSlamQuiz() {
             <div className="space-y-8">
               <div className="animate-slideIn">
                 {questions[currentQuestion] && (
-                  <div className="bg-[#ffffff] p-8 rounded-xl border shadow-sm transition-all duration-300 hover:shadow-md mb-6">
-                    <h3 className="text-xl font-semibold mb-6 text-black">{questions[currentQuestion].question}</h3>
+                  <div className="bg-[#ffffff] p-8 rounded-xl border border-gray-900 shadow-sm transition-all duration-300 hover:shadow-md mb-6">
+                    <h3 className="text-xl font-semibold mb-6 text-black border-b border-gray-900 pb-2">{questions[currentQuestion].question}</h3>
 
                     <RadioGroup value={selectedAnswer} onValueChange={setSelectedAnswer} className="space-y-4">
                       {questions[currentQuestion].options.map((option: string, index: number) => (
                         <div
                           key={index}
-                          className={`flex items-center space-x-3 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+                          className={`flex items-center space-x-3 p-4 rounded-xl transition-all duration-200 cursor-pointer bg-white border border-gray-900 ${
                             selectedAnswer === index.toString() 
                               ? 'bg-gray-100 shadow-sm transform scale-105' 
-                              : 'bg-gray-100 hover:transform hover:scale-102'
+                              : 'bg-gray-100 hover:transform hover:scale-105'
                           }`}
                         >
                           <RadioGroupItem value={index.toString()} id={`option-${index}`} />
@@ -1231,7 +1264,7 @@ export default function WWESummerSlamQuiz() {
                 <Button
                   onClick={handleAnswer}
                   disabled={!selectedAnswer || isSubmitting}
-                  className={`w-full py-6 text-white transition-all duration-200 transform hover:scale-105 ${
+                  className={`w-full py-6 mt-2 text-white transition-all duration-200 transform hover:scale-105 ${
                     isSubmitting 
                       ? 'bg-gray-400 cursor-not-allowed' 
                       : 'bg-black hover:bg-gray-800 hover:shadow-lg'
@@ -1248,25 +1281,8 @@ export default function WWESummerSlamQuiz() {
                   )}
                 </Button>
 
-                {/* Quiz progress bar */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-600">Quiz progress:</span>
-                    <span className="font-semibold">{currentQuestion + 1} / {questions.length}</span>
-                  </div>
-                  <div 
-                    aria-valuemax={questions.length} 
-                    aria-valuemin={0} 
-                    aria-valuenow={currentQuestion + 1}
-                    role="progressbar" 
-                    className="relative h-3 w-full overflow-hidden rounded-full bg-gray-200"
-                  >
-                    <div 
-                      className="h-full bg-gradient-to-r from-[#ff0000] to-[#ff0000] transition-all duration-300 ease-out" 
-                      style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-                    />
-                  </div>
-                </div>
+                {/* Discount progress bar instead of quiz progress */}
+                <DiscountProgressBar correctAnswers={correctAnswers} />
               </div>
             </div>
           </div>
@@ -1283,7 +1299,7 @@ const DiscountProgressBar = ({ correctAnswers }: { correctAnswers: number }) => 
   const progressPercentage = (discount / maxDiscount) * 100;
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg">
+    <div className="bg- p-4 rounded-lg">
       <div className="flex justify-between items-center">
         <span className="text-sm text-gray-600">Discount progress:</span>
         <span className="font-semibold">${discount} / ${maxDiscount}</span>
@@ -1296,7 +1312,7 @@ const DiscountProgressBar = ({ correctAnswers }: { correctAnswers: number }) => 
         className="relative h-4 w-full overflow-hidden rounded-full bg-gray-200 mt-2"
       >
         <div 
-          className="h-full bg-gradient-to-r from-[#ff0000] to-[#ff0000] transition-all duration-500 ease-out" 
+          className="discount-progress-bar h-full transition-all duration-500 ease-out" 
           style={{ width: `${progressPercentage}%` }}
         />
       </div>
@@ -1304,19 +1320,67 @@ const DiscountProgressBar = ({ correctAnswers }: { correctAnswers: number }) => 
   );
 };
 
-// Basic WWE footer component
+// Footer exato conforme o design fornecido
 const BasicFooter = () => (
-  <footer className="bg-white">
-    <div className="container mx-auto px-4">
+  <footer className="bg-gray-100 pt-12 pb-8">
+    <div className="max-w-2xl mx-auto px-4">
+      {/* Main footer links - 2x3 grid */}
+      <div className="grid grid-cols-2 gap-y-2 mb-8 text-center">
+        <div>
+          <a href="#" className="text-gray-700 hover:text-gray-900 text-sm font-medium">Promo Terms and Exclusions</a>
+        </div>
+        <div>
+          <a href="#" className="text-gray-700 hover:text-gray-900 text-sm font-medium">Contact Us</a>
+        </div>
+        <div>
+          <a href="#" className="text-gray-700 hover:text-gray-900 text-sm font-medium">Help</a>
+        </div>
+        <div>
+          <a href="#" className="text-gray-700 hover:text-gray-900 text-sm font-medium">Return Policy</a>
+        </div>
+        <div>
+          <a href="#" className="text-gray  -700 hover:text-gray-900 text-sm font-medium">Track My Order</a>
+        </div>
+        <div>
+          <a href="#" className="text-gray-700 hover:text-gray-900 text-sm font-medium">Zip</a>
+        </div>
+      </div>
+
+      {/* Social media icons */}
+      <div className="flex justify-center space-x-4 mb-8">
+       <img src="/icons.jpg" alt="Social Media Icons" className="w-18 h-10" />
+      </div>
+
+      {/* Legal links */}
+      <div className="text-center mb-6">
+        <div className="flex flex-wrap justify-center gap-2 text-sm">
+          <a href="#" className="text-black hover:text-gray-900">Privacy Policy</a>
+          <span className="text-gray-700">|</span>
+          <a href="#" className="text-black hover:text-gray-900">Your Privacy Choices</a>
+          <span className="text-gray-700">|</span>
+          <a href="#" className="text-black hover:text-gray-900">Accessibility</a>
+          <span className="text-gray-700">|</span>
+          <a href="#" className="text-black hover:text-gray-900">Terms of Use</a>
+          <span className="text-gray-700">|</span>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2 text-sm mt-2">
+          <a href="#" className="text-black hover:text-gray-900">Modern Slavery and Child Labor Statement</a>
+          <span className="text-gray-700">|</span>
+          <a href="#" className="text-black hover:text-gray-900">Site Map</a>
+          <span className="text-gray-700">|</span>
+        </div>
+        <div className="text-center mt-2">
+          <a href="#" className="text-black hover:text-gray-900 text-sm">Shopping Internationally? Visit euroshop.WWE.com</a>
+          <span className="text-gray-700 mx-2">|</span>
+          <a href="#" className="text-black hover:text-gray-900 text-sm">Product Concerns</a>
+        </div>
+      </div>
+
+      {/* Copyright */}
       <div className="text-center">
-        <div className="mb-4">
-          <h3 className="text-xl font-bold mb-2">WWE SummerSlam 2025</h3>
-          <p className="text-gray-900">The Biggest Party of the Summer</p>
-        </div>
-        <div className="border-t border-gray-700 pt-4 text-sm text-gray-400">
-          <p>&copy; 2024 World Wrestling Entertainment, Inc. All rights reserved.</p>
-          <p className="mt-1">WWE and all related characters and elements are trademarks of WWE.</p>
-        </div>
+        <p className="text-xs text-gray-600 max-w-md mx-12">
+            © <span className="text-gray-700">Fanatics, LLC.</span>, 2025. All Rights Reserved. No portion of this site may be reproduced or duplicated without the express permission of <span className="text-gray-700">Fanatics, LLC</span>.
+        </p>
       </div>
     </div>
   </footer>

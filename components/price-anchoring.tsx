@@ -21,8 +21,8 @@ const kits: Kit[] = [
     id: "john-cena",
     name: "John Cena Farewell Tour Kit",
     wrestler: "John Cena",
-    price: 49.90,
-    originalPrice: 110.99,
+    price: 49.99,
+    originalPrice: 149.99,
     savings: 55,
     description: "3 Official Farewell Tour T-Shirts",
     items: [
@@ -34,17 +34,18 @@ const kits: Kit[] = [
       "Official Champion Signature"
     ],
     images: [
+      "/KIT JOHN.png",
       "/Men's-Green-John-Cena-Farewell-Tour-SummerSlam-202/Men's-Green-John-Cena-Farewell-Tour-SummerSlam-202-10.jpg",
       "/Men's-Green-John-Cena-Farewell-Tour-SummerSlam-202/Men's-Green-John-Cena-Farewell-Tour-SummerSlam-202-08.jpg",
-      "/Men's-Black-John-Cena-Farewell-Tour-2025-San-Anton/Men's-Black-John-Cena-Farewell-Tour-2025-San-Anton-02.jpg"
+      "/Men's-Black-John-Cena-Farewell-Tour-2025-San-Anton/Men's-Black-John-Cena-Farewell-Tour-2025-San-Anton-04.jpg"
     ]
   },
   {
     id: "cody-rhodes", 
     name: "Cody Rhodes American Nightmare Kit",
     wrestler: "Cody Rhodes",
-    price: 59.90,
-    originalPrice: 164.97,
+    price: 49.99,
+    originalPrice: 149.99,
     savings: 64,
     description: "Jacket + T-Shirt + Hat Collection",
     items: [
@@ -56,6 +57,7 @@ const kits: Kit[] = [
       "Official Champion Signature"
     ],
     images: [     
+      "/KIT CODY.png",
       "/Men's-White-Cody-Rhodes-Stars-and-Stripes-Windbrea/Men's-White-Cody-Rhodes-Stars-and-Stripes-Windbrea-09.jpg",
       "/Men's-White-Cody-Rhodes-Stars-&-Stripes-Nightmare-/Men's-White-Cody-Rhodes-Stars-&-Stripes-Nightmare--01.jpg",
       "/Men's-White-Cody-Rhodes-Americana-Skull-Adjustable/Men's-White-Cody-Rhodes-Americana-Skull-Adjustable-01.jpg"
@@ -93,8 +95,9 @@ export default function PriceAnchoring({ correctAnswers, onBuyClick }: PriceAnch
   }, [selectedKit])
 
   return (
-    <div className="bg-white px-8 pt-4 pb-8 rounded-xl border border-gray-100">
-      
+    <div className="bg-white px-5 pt-4 pb-8">
+      <h1 className="text-center text-[#2c2c2c] text-2xl font-bold font-sans mb-4">Make Your Choice</h1>
+      <div className="flex justify-center mb-6"><span className="text-sm text-wrap text-center text-gray-500">Choose your favorite WWE Superstar and save up to 70% off! - Max $100</span></div>
       {/* Kit Selection Tabs */}
       <div className="flex justify-center mb-6">
         <div className="flex bg-gray-100 rounded-lg p-1">
@@ -117,7 +120,7 @@ export default function PriceAnchoring({ correctAnswers, onBuyClick }: PriceAnch
       {/* Product Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center space-x-4">
-          <div className="w-24 h-24 rounded-lg px-2 py-2 overflow-hidden bg-gray-50 relative">
+          <div className="w-20 h-30 rounded-lg overflow-hidden bg-gray-50 relative">
             <Image
               src={selectedKitData.images[currentImageIndex]}
               alt={selectedKitData.name}
@@ -141,7 +144,7 @@ export default function PriceAnchoring({ correctAnswers, onBuyClick }: PriceAnch
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-500 uppercase tracking-wide mb-1">Original Price</p>
-          <p className="text-2xl font-light line-through text-gray-400">${selectedKitData.originalPrice}</p>
+          <p className="text-2xl font-light line-through text-red-500">${selectedKitData.originalPrice}</p>
         </div>
       </div>
       
@@ -187,7 +190,7 @@ export default function PriceAnchoring({ correctAnswers, onBuyClick }: PriceAnch
           <div className="mt-6">
             <button
               onClick={() => onBuyClick(selectedKit)}
-              className="w-full bg-[#f00] hover:bg-[#d00] text-white font-semibold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full bg-[#18d431] hover:bg-[#33ff00] shadow-xl shadow-gray-500/35 hover:shadow-green-200 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
